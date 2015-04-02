@@ -41,6 +41,10 @@ void setup() {
   buzzer.play(">g32");
   button.waitForButton();
   delay(500);
+  DoCalibrate();
+}
+
+void DoCalibrate(){
   struct ZumoState s;
   s.left = 0;
   s.right = 0;
@@ -88,6 +92,10 @@ void SetMotorsReadSensors(struct ZumoState* s){
   Serial.println(report);
 }
 
+bool ObstacleDetected(struct ZumoState* s){
+  return false;
+}
+
 void loop() {
   struct ZumoState s;
   s.left = 200;
@@ -96,8 +104,9 @@ void loop() {
   buzzer.play(">g32>>c32");
   button.waitForButton();
   delay(1000);
-  for(;;){
+  do{
     SetMotorsReadSensors(&s);
+    
     delay(20);
-  }
+  } while ( !ObstacleDetected(&s));
 }

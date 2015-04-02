@@ -39,7 +39,7 @@ void setup() {
   }
   gyro.enableDefault();
   
-  //output last calibration run to serial
+  //send data from last run to serial
   
   int addr = 0;
   for (int i = 0; i < LOG_ROWS; i++){ 
@@ -58,11 +58,37 @@ void setup() {
 
   buzzer.play(">g32");
   button.waitForButton();
+  delay(500);
+  struct ZumoState s;
+  s.left = 0;
+  s.right = 0;
+  for (int i = 0; i < 10; i++){
+      SetMotorsReadSensors(&s);
+      delay(20);
+  }
+  s.left = 200;
+  s.right = 200;
+  for (int i = 0; i < 50; i++){
+      SetMotorsReadSensors(&s);
+      delay(20);
+  }
+  s.left = 0;
+  s.right = 0;
+  for (int i = 0; i < 10; i++){
+      SetMotorsReadSensors(&s);
+      delay(20);
+  }
+  s.left = -200;
+  s.right = -100;
   
-  //TODO: record current calibration run
-  
+  for (int i = 0; i < 35; i++){
+      SetMotorsReadSensors(&s);
+      delay(20);
+  }
+  motors.setSpeeds(0,0);
   buzzer.play(">g32>>c32");
   button.waitForButton();
+  delay(1000);
 }
 
 
@@ -105,8 +131,8 @@ void SetMotorsReadSensors(struct ZumoState* s){
 
 void loop() {
   struct ZumoState s;
-  s.left = 0;
-  s.right = 0;
+  s.left = 200;
+  s.right = 150;
   for(;;){
     SetMotorsReadSensors(&s);
     delay(20);

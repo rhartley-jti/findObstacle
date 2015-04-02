@@ -15,9 +15,6 @@ ZumoBuzzer buzzer;
 ZumoMotors motors;
 
 char report[80];
-const int LOG_COLUMNS = 8;
-const int LOG_ROWS = 100;
-const int LOG_BIAS = 32768;
 
 struct ZumoState{
    int left, right;
@@ -39,22 +36,7 @@ void setup() {
   }
   gyro.enableDefault();
   
-  //send data from last run to serial
-  
-  int addr = 0;
-  for (int i = 0; i < LOG_ROWS; i++){ 
-    for (int j = 0; j < LOG_COLUMNS; j++){
-      int val;
-      val += EEPROM.read(addr++);
-      val *= 256;
-      val += EEPROM.read(addr++);
-      val -= LOG_BIAS;
-      addr += sizeof(int);
-      Serial.print(val);
-      Serial.print(" ");
-    }
-    Serial.println("");
-  }
+  Serial.println("Ready to calibrate?");
 
   buzzer.play(">g32");
   button.waitForButton();
@@ -86,18 +68,6 @@ void setup() {
       delay(20);
   }
   motors.setSpeeds(0,0);
-  buzzer.play(">g32>>c32");
-  button.waitForButton();
-  delay(1000);
-}
-
-
-int logAddr = 0;
-int logRow = 0;
-
-void put(int val){
-  EEPROM.write(logAddr++, (val+LOG_BIAS)/256);
-  EEPROM.write(logAddr++, (val+LOG_BIAS)%256);
 }
 
 void SetMotorsReadSensors(struct ZumoState* s){
@@ -110,17 +80,6 @@ void SetMotorsReadSensors(struct ZumoState* s){
   s->wx = gyro.g.x;
   s->wy = gyro.g.y;
   s->wz = gyro.g.z;
-  if (logRow < LOG_ROWS){
-      ++logRow;
-      put(s->left);
-      put(s->right);
-      put(compass.a.x);
-      put(compass.a.y);
-      put(compass.a.z);
-      put(gyro.g.x);
-      put(gyro.g.y);
-      put(gyro.g.z);
-  }
   
   snprintf(report, sizeof(report), "%4d,%4d, %6d,%6d,%6d, %6d,%6d,%6d",
     s->left, s->right,
@@ -133,6 +92,10 @@ void loop() {
   struct ZumoState s;
   s.left = 200;
   s.right = 150;
+  Serial.println("Ready for action?");
+  buzzer.play(">g32>>c32");
+  button.waitForButton();
+  delay(1000);
   for(;;){
     SetMotorsReadSensors(&s);
     delay(20);

@@ -17,6 +17,7 @@ ZumoMotors motors;
 char report[80];
 const int LOG_COLUMNS = 8;
 const int LOG_ROWS = 100;
+const int LOG_BIAS = 32768;
 
 struct ZumoState{
    int left, right;
@@ -44,7 +45,10 @@ void setup() {
   for (int i = 0; i < LOG_ROWS; i++){ 
     for (int j = 0; j < LOG_COLUMNS; j++){
       int val;
-      //EEPROM.get(addr, val);
+      val += EEPROM.read(addr++);
+      val *= 256;
+      val += EEPROM.read(addr++);
+      val -= LOG_BIAS;
       addr += sizeof(int);
       Serial.print(val);
       Serial.print(" ");
@@ -66,8 +70,8 @@ int logAddr = 0;
 int logRow = 0;
 
 void put(int val){
-  //EEPROM.put(logPos, val);
-  logAddr += sizeof(int);
+  EEPROM.write(logAddr++, (val+LOG_BIAS)/256);
+  EEPROM.write(logAddr++, (val+LOG_BIAS)%256);
 }
 
 void SetMotorsReadSensors(struct ZumoState* s){
